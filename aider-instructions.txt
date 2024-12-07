@@ -1,0 +1,77 @@
+Project: Modular Python CRUD Operations
+=======================================
+
+Current Status
+-------------
+- Established basic project structure with common, terminal, fastapi, and mcp directories
+- Implemented core database connection and CRUD operations in common/database.py
+- Created base data model structure in common/models.py
+- Set up requirements.txt with core dependencies
+
+Project Structure
+----------------
+root/
+├── .env                  # Database credentials (needs to be created)
+├── requirements.txt      # Project dependencies
+├── aider-instructions.txt # This file
+├── common/
+│   ├── __init__.py
+│   ├── database.py      # Database connection and CRUD operations
+│   └── models.py        # Base data models
+├── terminal/
+│   ├── __init__.py
+│   └── main.py          # To be implemented
+├── fastapi/
+│   ├── __init__.py
+│   ├── main.py          # To be implemented
+│   └── routes.py        # To be implemented
+└── mcp/
+    ├── __init__.py
+    ├── server.py        # To be implemented
+    └── client.py        # To be implemented
+
+Required .env Configuration
+-------------------------
+DB_HOST=your_host
+DB_USER=your_user
+DB_PASSWORD=your_password
+DB_NAME=your_database
+DB_PORT=your_port
+
+Next Steps
+----------
+1. Choose an implementation to complete first:
+   - Terminal implementation (terminal/main.py)
+   - FastAPI implementation (fastapi/main.py and routes.py)
+   - MCP implementation (mcp/server.py and client.py)
+
+2. Create specific data models in common/models.py for your use case
+
+3. Test database connection and CRUD operations
+
+4. Implement chosen interface (terminal, FastAPI, or MCP)
+
+Current Dependencies
+------------------
+- python-dotenv
+- mysql-connector-python
+- fastapi
+- uvicorn
+- mcp
+- typer
+- rich
+
+Implementation Status
+-------------------
+✓ Common Database Operations
+✓ Base Model Structure
+□ Terminal Implementation
+□ FastAPI Implementation
+□ MCP Implementation
+
+Notes
+-----
+- The project uses a context manager for database connections
+- CRUD operations are implemented as static methods
+- Base model includes optional ID field
+- Each implementation will use the common database and models code
