@@ -1,67 +1,39 @@
-import asyncio
-from common.database import CRUDOperations
 import json
+from mcp import Server
+from common.database import DatabaseConnection
 
-class MCPServer:
-    def __init__(self, host='localhost', port=8888):
-        self.host = host
-        self.port = port
-
-    async def handle_client(self, reader, writer):
-        while True:
-            try:
-                data = await reader.read(1024)
-                if not data:
-                    break
-                
-                message = json.loads(data.decode())
-                response = await self.process_message(message)
-                
-                writer.write(json.dumps(response).encode())
-                await writer.drain()
-                
-            except Exception as e:
-                writer.write(json.dumps({"error": str(e)}).encode())
-                await writer.drain()
-                break
+class ClientServer(Server):
+    def __init__(self, host='localhost', port=5000):
+        super().__init__(host, port)
+        self.db = DatabaseConnection()
         
-        writer.close()
-        await writer.wait_closed()
-
-    async def process_message(self, message):
-        action = message.get("action")
-        data = message.get("data", {})
+        # Register handlers
+        self.register_handler('get_client', self.handle_get_client)
+        self.register_handler('search_clients', self.handle_search_clients)
+    
+    def handle_get_client(self, data):
+        """Handle get_client requests"""
+        client_id = data.get('client_id')
+        field = data.get('field')
         
-        if action == "create":
-            user_id = CRUDOperations.create("users", data)
-            return {"status": "success", "id": user_id}
-            
-        elif action == "read":
-            conditions = data.get("conditions")
-            users = CRUDOperations.read("users", conditions)
-            return {"status": "success", "data": users}
-            
-        elif action == "update":
-            conditions = data.get("conditions", {})
-            update_data = data.get("update_data", {})
-            rows = CRUDOperations.update("users", update_data, conditions)
-            return {"status": "success", "updated_rows": rows}
-            
-        elif action == "delete":
-            conditions = data.get("conditions", {})
-            rows = CRUDOperations.delete("users", conditions)
-            return {"status": "success", "deleted_rows": rows}
-            
-        return {"status": "error", "message": "Invalid action"}
+        if not client_id:
+            return {'error': 'client_id is required'}
+        
+        result = self.db.get_client(client_id, [field] if field else None)
+        return {'result': result} if result else {'error': 'Client not found'}
+    
+    def handle_search_clients(self, data):
+        """Handle search_clients requests"""
+        criteria = {
+            'city': data.get('city'),
+            'gender': data.get('gender')
+        }
+        # Remove None values
+        criteria = {k: v for k, v in criteria.items() if v is not None}
+        
+        results = self.db.search_clients(criteria)
+        return {'results': results}
 
-    async def start(self):
-        server = await asyncio.start_server(
-            self.handle_client, self.host, self.port
-        )
-        print(f"Server running on {self.host}:{self.port}")
-        async with server:
-            await server.serve_forever()
-
-if __name__ == "__main__":
-    server = MCPServer()
-    asyncio.run(server.start())
+if __name__ == '__main__':
+    server = ClientServer()
+    server.start()
